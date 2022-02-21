@@ -22,8 +22,12 @@ public class View extends VerticalLayout {
         Model model = new Model();
 
         addGraph(model.getGaussBundleXKList(), "gauss bundle: e^(-x^2)");
+
         addGraph(model.getGaussBundleDFTXKList(), "gauss bundle DFT: e^(-x^2)");
         addGraph(model.getGaussBundleFFTXKList(), "gauss bundle FFT: e^(-x^2)");
+
+        addGraph(model.getFunctionXKList(), "function: 2xe(-x^2/2)");
+        addGraph(model.getFunctionFFTXKList(), "function FFT: 2xe(-x^2/2)");
     }
 
     private void addGraph(List<Entity<Double, Complex>> list, String title) {

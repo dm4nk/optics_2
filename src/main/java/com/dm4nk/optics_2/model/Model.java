@@ -30,8 +30,11 @@ public class Model {
     private List<Double> x_k = new ArrayList<>();
     private List<Double> y_k = new ArrayList<>();
     private List<Complex> gaussBundleList = new ArrayList<>();
+    private List<Complex> functionList = new ArrayList<>();
     @Getter
     private List<Entity<Double, Complex>> gaussBundleXKList = new ArrayList<>();
+    @Getter
+    private List<Entity<Double, Complex>> functionXKList = new ArrayList<>();
 
     private List<Complex> gaussBundleDFTList = new ArrayList<>();
     @Getter
@@ -40,6 +43,10 @@ public class Model {
     private List<Complex> gaussBundleFFTList = new ArrayList<>();
     @Getter
     private List<Entity<Double, Complex>> gaussBundleFFTXKList = new ArrayList<>();
+
+    private List<Complex> functionFFTList = new ArrayList<>();
+    @Getter
+    private List<Entity<Double, Complex>> functionFFTXKList = new ArrayList<>();
 
 
     public Model() {
@@ -70,9 +77,6 @@ public class Model {
     }
 
     public List<Complex> FFT(List<Complex> function){
-
-
-
         Complex[] res = swapList(addZerosToListToSize(function, m))
         .toArray(new Complex[0]);
 
@@ -93,21 +97,39 @@ public class Model {
         for(int i = 0; i < n; ++i)
             y_k.add(b1 + i * l_n);
 
+        //init gauss bundle
         gaussBundleList = x_k.stream()
                         .map(x -> new Complex(gaussBundle(x), 0))
                         .collect(Collectors.toList());
 
+        //init my function
+        functionList = x_k.stream()
+                .map(x -> new Complex(f(x), 0))
+                .collect(Collectors.toList());
+
+        //combining functions with x_k
         for(int i = 0; i < x_k.size(); ++i)
             gaussBundleXKList.add(new Entity<>(x_k.get(i), gaussBundleList.get(i)));
 
+        for(int i = 0; i < x_k.size(); ++i)
+            functionXKList.add(new Entity<>(x_k.get(i), functionList.get(i)));
+
+        //DFT gauss
         gaussBundleDFTList = DFT(gaussBundleList);
 
         for(int i = 0; i < y_k.size(); ++i)
             gaussBundleDFTXKList.add(new Entity<>(y_k.get(i), gaussBundleDFTList.get(i)));
 
+        //FFT gauss
         gaussBundleFFTList = FFT(gaussBundleList);
 
         for(int i = 0; i < y_k.size(); ++i)
             gaussBundleFFTXKList.add(new Entity<>(y_k.get(i), gaussBundleFFTList.get(i)));
+
+        //FFT function
+        functionFFTList = FFT(functionList);
+
+        for(int i = 0; i < y_k.size(); ++i)
+            functionFFTXKList.add(new Entity<>(y_k.get(i), functionFFTList.get(i)));
     }
 }
