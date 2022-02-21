@@ -17,7 +17,7 @@ public class FunctionsUtility {
 
     public static List<Complex> convertDoubleArrayToComplexList(double[] array) {
         List<Complex> resultList = new ArrayList<>();
-        for (int i = 0; i < array.length/2; i += 1) {//array length / 2 = m
+        for (int i = 0; i < array.length / 2; i += 1) {//array length / 2 = m
             resultList.add(new Complex(array[i * 2], array[i * 2 + 1]));
         }
         return resultList;

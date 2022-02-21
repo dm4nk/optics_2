@@ -8,6 +8,7 @@ import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
 import org.apache.commons.math3.transform.TransformType;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,44 +25,57 @@ public class Model {
     public static final int n = 200;
     public static final double b2 = pow(n, 2) / (4 * a2 * m);
     public static final double b1 = b2 * -1;
-    public static double h_n = (a2-a1)/n;
-    public static double l_n = (b2-b1)/n;
+    public static double l_n = (b2 - b1) / n;
+    public static double h_n = (a2 - a1) / n;
+    private final List<Double> x_k = new ArrayList<>();
+    private final List<Double> x_b = new ArrayList<>();
 
-    private List<Double> x_k = new ArrayList<>();
-    private List<Double> y_k = new ArrayList<>();
+    //1D
     private List<Complex> gaussBundleList = new ArrayList<>();
     private List<Complex> functionList = new ArrayList<>();
     @Getter
-    private List<Entity<Double, Complex>> gaussBundleXKList = new ArrayList<>();
+    private final List<Entity<Double, Complex>> gaussBundleXKList = new ArrayList<>();
     @Getter
-    private List<Entity<Double, Complex>> functionXKList = new ArrayList<>();
+    private final List<Entity<Double, Complex>> functionXKList = new ArrayList<>();
 
     private List<Complex> gaussBundleDFTList = new ArrayList<>();
     @Getter
-    private List<Entity<Double, Complex>> gaussBundleDFTXKList = new ArrayList<>();
+    private final List<Entity<Double, Complex>> gaussBundleDFTXKList = new ArrayList<>();
 
     private List<Complex> gaussBundleFFTList = new ArrayList<>();
     @Getter
-    private List<Entity<Double, Complex>> gaussBundleFFTXKList = new ArrayList<>();
+    private final List<Entity<Double, Complex>> gaussBundleFFTXKList = new ArrayList<>();
+
+    private List<Complex> functionDFTList = new ArrayList<>();
+    @Getter
+    private final List<Entity<Double, Complex>> functionDFTXKList = new ArrayList<>();
 
     private List<Complex> functionFFTList = new ArrayList<>();
     @Getter
-    private List<Entity<Double, Complex>> functionFFTXKList = new ArrayList<>();
+    private final List<Entity<Double, Complex>> functionFFTXKList = new ArrayList<>();
 
-
-    public Model() {
+    public Model() throws IOException {
         init();
+        Model2D.twoDimensionalCalculate(true);
     }
 
     private double f(double x) {
-        return 2*x*exp(-pow(x, 2)/2);
+        return 2 * x * exp(-pow(x, 2) / 2);
     }
 
     private double gaussBundle(double x) {
         return exp(-pow(x, 2));
     }
 
-    public List<Complex> DFT(List<Complex> function){
+    private double f2D(double x, double y) {
+        return 4 * pow(x, 2) * exp(-pow(x, 2) / 2) * exp(-pow(y, 2) / 2);
+    }
+
+    private double gaussBundle2D(double x, double y) {
+        return Math.exp(-Math.pow(x, 2) - Math.pow(y, 2));
+    }
+
+    public List<Complex> DFT(List<Complex> function) {
         DoubleFFT_1D discreteFourierTransform = new DoubleFFT_1D(m);
 
         double[] resultArray = convertComplexListToDoubleArray(
@@ -76,9 +90,9 @@ public class Model {
         return resultListAfterDFT;
     }
 
-    public List<Complex> FFT(List<Complex> function){
+    public List<Complex> FFT(List<Complex> function) {
         Complex[] res = swapList(addZerosToListToSize(function, m))
-        .toArray(new Complex[0]);
+                .toArray(new Complex[0]);
 
         FastFourierTransformer fastFourierTransformer = new FastFourierTransformer(DftNormalization.STANDARD);
         res = fastFourierTransformer.transform(res, TransformType.FORWARD);
@@ -91,16 +105,16 @@ public class Model {
     }
 
     private void init() {
-        for(int i = 0; i < n; ++i)
+        for (int i = 0; i < n; ++i)
             x_k.add(a1 + i * h_n);
 
-        for(int i = 0; i < n; ++i)
-            y_k.add(b1 + i * l_n);
+        for (int i = 0; i < n; ++i)
+            x_b.add(b1 + i * l_n);
 
         //init gauss bundle
         gaussBundleList = x_k.stream()
-                        .map(x -> new Complex(gaussBundle(x), 0))
-                        .collect(Collectors.toList());
+                .map(x -> new Complex(gaussBundle(x), 0))
+                .collect(Collectors.toList());
 
         //init my function
         functionList = x_k.stream()
@@ -108,28 +122,34 @@ public class Model {
                 .collect(Collectors.toList());
 
         //combining functions with x_k
-        for(int i = 0; i < x_k.size(); ++i)
+        for (int i = 0; i < x_k.size(); ++i)
             gaussBundleXKList.add(new Entity<>(x_k.get(i), gaussBundleList.get(i)));
 
-        for(int i = 0; i < x_k.size(); ++i)
+        for (int i = 0; i < x_k.size(); ++i)
             functionXKList.add(new Entity<>(x_k.get(i), functionList.get(i)));
 
         //DFT gauss
         gaussBundleDFTList = DFT(gaussBundleList);
 
-        for(int i = 0; i < y_k.size(); ++i)
-            gaussBundleDFTXKList.add(new Entity<>(y_k.get(i), gaussBundleDFTList.get(i)));
+        for (int i = 0; i < x_b.size(); ++i)
+            gaussBundleDFTXKList.add(new Entity<>(x_b.get(i), gaussBundleDFTList.get(i)));
 
         //FFT gauss
         gaussBundleFFTList = FFT(gaussBundleList);
 
-        for(int i = 0; i < y_k.size(); ++i)
-            gaussBundleFFTXKList.add(new Entity<>(y_k.get(i), gaussBundleFFTList.get(i)));
+        for (int i = 0; i < x_b.size(); ++i)
+            gaussBundleFFTXKList.add(new Entity<>(x_b.get(i), gaussBundleFFTList.get(i)));
+
+        //DFT function
+        functionDFTList = DFT(functionList);
+
+        for (int i = 0; i < x_b.size(); ++i)
+            functionDFTXKList.add(new Entity<>(x_b.get(i), functionDFTList.get(i)));
 
         //FFT function
         functionFFTList = FFT(functionList);
 
-        for(int i = 0; i < y_k.size(); ++i)
-            functionFFTXKList.add(new Entity<>(y_k.get(i), functionFFTList.get(i)));
+        for (int i = 0; i < x_b.size(); ++i)
+            functionFFTXKList.add(new Entity<>(x_b.get(i), functionFFTList.get(i)));
     }
 }
