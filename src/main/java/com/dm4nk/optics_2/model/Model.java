@@ -56,7 +56,6 @@ public class Model {
 
     public Model() throws IOException {
         init();
-        Model2D.twoDimensionalCalculate(true);
     }
 
     private double f(double x) {

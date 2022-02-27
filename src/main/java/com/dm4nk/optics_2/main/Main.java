@@ -6,6 +6,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Model2D.twoDimensionalCalculate(true);
+        Model2D.twoDimensionalCalculate(Model2D::gauss2, "gauss");
+        Model2D.twoDimensionalCalculate(Model2D::f2, "function");
     }
 }

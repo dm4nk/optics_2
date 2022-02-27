@@ -23,9 +23,9 @@ public class FunctionsUtility {
         return resultList;
     }
 
-    public static List<Complex> swapList(List<Complex> list) {
+    public static <T> List<T> swapList(List<T> list) {
         int listMiddle = list.size() / 2;
-        List<Complex> resultList = new ArrayList<>(list.subList(listMiddle, list.size()));
+        List<T> resultList = new ArrayList<>(list.subList(listMiddle, list.size()));
         resultList.addAll(list.subList(0, listMiddle));
         return resultList;
     }
@@ -33,8 +33,8 @@ public class FunctionsUtility {
     public static List<Complex> addZerosToListToSize(List<Complex> list, int size) {
         int zeroCount = size - list.size();
         for (int i = 0; i < zeroCount; i += 2) {
-            list.add(new Complex(0d, 0d));
-            list.add(0, new Complex(0d, 0d));
+            list.add(Complex.ZERO);
+            list.add(0, Complex.ZERO);
         }
         return list;
     }

@@ -11,16 +11,11 @@ import java.io.IOException;
 import java.util.List;
 
 public class ExcelWriter {
-    public static final int PHASE = 0;
-    public static final int AMPLITUDE = 1;
-    public static final int FFT_PHASE = 2;
-    public static final int FFT_AMPLITUDE = 3;
-
     public static final int n = 200;
 
-    public static void write(int type, List<Double> x, List<Double> y, List<List<Double>> z) throws IOException {
+    public static void write(String filename, List<Double> x, List<Double> y, List<List<Double>> z) throws IOException {
         XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet("Data");
+        XSSFSheet sheet = workbook.createSheet(filename);
 
         XSSFRow row;
         Cell cell;
@@ -42,7 +37,7 @@ public class ExcelWriter {
             }
         }
 
-        try (FileOutputStream outputStream = new FileOutputStream("src/main/resources/temp2.xlsx")) {
+        try (FileOutputStream outputStream = new FileOutputStream("src/main/resources/" + filename +".xlsx")) {
             workbook.write(outputStream);
         }
     }

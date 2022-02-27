@@ -16,6 +16,8 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.dm4nk.optics_2.utility.FunctionsUtility.addZerosToListToSize;
+import static com.dm4nk.optics_2.utility.FunctionsUtility.swapList;
 import static java.lang.Math.exp;
 import static java.lang.Math.pow;
 
@@ -29,32 +31,30 @@ public class Model2D {
     public static double l_n = (b2 - b1) / n;
     public static double h_n = (a2 - a1) / n;
 
-    public static void twoDimensionalCalculate(boolean isGaussInput) throws IOException {
-        List<Double> xList = linSpace(a1, a2, n);
-        List<Double> yList = linSpace(a1, a2, n);
-        List<List<Complex>> fList = isGaussInput ?
-                calculate2DFunction(xList, yList, Model2D::gauss2) :
-                calculate2DFunction(xList, yList, Model2D::f2);
-        //ExcelWriter.write(ExcelWriter.PHASE, xList, yList, phase2(fList));
-        ExcelWriter.write(ExcelWriter.AMPLITUDE, xList, yList, amplitude2(fList));
+    public static void twoDimensionalCalculate(BiFunction<Double, Double, Double> function, String filaHeader) throws IOException {
+        List<Double> xList = IntStream.range(0, n)
+                .boxed()
+                .map(e -> a1 + e * h_n)
+                .collect(Collectors.toList());
+
+        List<Double> yList = IntStream.range(0, n)
+                .boxed()
+                .map(e -> a1 + e * h_n)
+                .collect(Collectors.toList());
+
+        List<List<Complex>> fList = calculate2DFunction(xList, yList, function);
+        ExcelWriter.write(filaHeader + "_phase", xList, yList, phase2(fList));
+        ExcelWriter.write(filaHeader + "_amplitude", xList, yList, amplitude2(fList));
 
         //FFT
-        fillZeros2(fList, m);
-        fList = reverseHalves2(fList);
+        addZerosToListSize2(fList, m);
+        fList = swapList2(fList);
         List<List<Complex>> FListFft = fastFourierTransform2(fList);
         FListFft = multiply2(FListFft, h_n);
-        FListFft = reverseHalves2(FListFft);
+        FListFft = swapList2(FListFft);
         List<List<Complex>> FListFromCenter = getElementsFromCenter2(FListFft, n);
-        //ExcelWriter.write(ExcelWriter.FFT_PHASE, xList, yList, phase2(FListFromCenter));
-        //ExcelWriter.write(ExcelWriter.FFT_AMPLITUDE, xList, yList, amplitude2(FListFromCenter));
-    }
-
-    private static List<Double> linSpace(double start, double end, int numPoints) {
-        h_n = (end - start) / (numPoints - 1);
-        return IntStream.range(0, numPoints)
-                .boxed()
-                .map(e -> start + e * h_n)
-                .collect(Collectors.toList());
+        ExcelWriter.write(filaHeader + "_FFT phase", xList, yList, phase2(FListFromCenter));
+        ExcelWriter.write(filaHeader + "_FFT amplitude", xList, yList, amplitude2(FListFromCenter));
     }
 
     private static List<List<Complex>> calculate2DFunction(List<Double> xList, List<Double> yList,
@@ -74,13 +74,12 @@ public class Model2D {
         return 2 * x * exp(-pow(x, 2) / 2);
     }
 
-    //todo: change
-    private static double f2(double x, double y) {
+    public static double f2(double x, double y) {
         return f(x) * f(y);
     }
 
-    private static double gauss2(double x, double y) {
-        return Math.exp(-Math.pow(x, 2) - Math.pow(y, 2));
+    public static double gauss2(double x, double y) {
+        return Math.exp(-pow(x, 2) - pow(y, 2));
     }
 
     private static List<Double> phase(List<Complex> source) {
@@ -99,18 +98,10 @@ public class Model2D {
         return source.stream().map(Model2D::amplitude).collect(Collectors.toList());
     }
 
-    private static void fillZeros(List<Complex> list, int needSize) {
-        int zerosSize = needSize - list.size();
-        for (int i = 0; i < zerosSize; i += 2) {
-            list.add(Complex.ZERO);
-            list.add(0, Complex.ZERO);
-        }
-    }
-
-    private static void fillZeros2(List<List<Complex>> list, int needSize) {
+    private static void addZerosToListSize2(List<List<Complex>> list, int needSize) {
         int zerosSize = needSize - list.size();
         for (List<Complex> row : list) {
-            fillZeros(row, needSize);
+            addZerosToListToSize(row, needSize);
         }
 
         List<Complex> zeros = Collections.nCopies(list.size() + zerosSize, Complex.ZERO);
@@ -120,18 +111,10 @@ public class Model2D {
         }
     }
 
-    private static <T> List<T> reverseHalves(List<T> list) {
-        int center = list.size() / 2;
-        List<T> firstHalf = list.subList(0, center);
-        List<T> secondHalf = list.subList(center, list.size());
-        secondHalf.addAll(firstHalf);
-        return secondHalf;
-    }
-
-    private static List<List<Complex>> reverseHalves2(List<List<Complex>> list) {
+    private static List<List<Complex>> swapList2(List<List<Complex>> list) {
         List<List<Complex>> result = new ArrayList<>();
-        for (List<Complex> row : reverseHalves(list)) {
-            result.add(reverseHalves(row));
+        for (List<Complex> row : swapList(list)) {
+            result.add(swapList(row));
         }
         return result;
     }
