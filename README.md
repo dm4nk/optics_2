@@ -8,7 +8,8 @@ and
 [Vaadin](https://vaadin.com/).
 
 Here I use one-dimensional and two-dimensional 
-[Fast Fourier Transformation and ](https://en.wikipedia.org/wiki/Fast_Fourier_transform)
+[Fast Fourier Transformation](https://en.wikipedia.org/wiki/Fast_Fourier_transform)
+and
 [Discrete Fourier Transformation](https://en.wikipedia.org/wiki/Discrete_Fourier_transform)
 on several functions and see how they react.
 
