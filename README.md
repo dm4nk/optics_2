@@ -32,9 +32,11 @@ Now, when we reassured that they have same expected result, we can proceed
 to transforming given function: _**2 x exp(-x^2)**_
 
 This is phase and amplitude of function itself
+
 ![img_3.png](img_3.png)
 
 And here is its transformation
+
 ![img_4.png](img_4.png)
 
 Here we can see some strange movements of function phase near domain bundles 
@@ -49,15 +51,22 @@ When we saw how function of one argument reacts to Fast Fourier Transformation,
 we can proceed to transforming function with two arguments: _**4 x y exp(-x^2 - y^2)**_
 
 Here is amplitude and phase of function itself:
+
 Amplitude:
+
 ![img_5.png](img_5.png)
+
 Phase:
+
 ![img_6.png](img_6.png)
 
 Here we can also see some computer accuracy issues.
 
 And here is function's transformation:
 Amplitude:
+
 ![img_7.png](img_7.png)
+
 Phase:
+
 ![img_8.png](img_8.png)
