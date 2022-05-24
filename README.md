@@ -3,7 +3,7 @@
 Project crated for learning purposes for optical informatics course
 in the university made with
 [Java 17](https://jdk.java.net/17/),
-[Spring Boot](https://spring.io/projects/spring-boot),
+[Spring Boot](https://spring.io/projects/spring-boot)
 and 
 [Vaadin](https://vaadin.com/).
 
